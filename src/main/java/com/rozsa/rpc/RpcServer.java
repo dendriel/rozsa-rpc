@@ -51,26 +51,4 @@ public class RpcServer {
         server.createContext("/", handler);
         server.setExecutor(null); // creates a default executor
     }
-
-//    private void loadServices(String fromPackage) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-//        Reflections reflections = new Reflections(new ConfigurationBuilder()
-//                .setUrls(ClasspathHelper.forPackage(fromPackage))
-//                .setScanners(new SubTypesScanner(),
-//                            new TypeAnnotationsScanner()) //.filterResultsBy(optionalFilter)),
-//                .filterInputsBy(new FilterBuilder().includePackage(fromPackage))
-//        );
-//
-////        Set<Class<? extends Object>> sr = reflections.getSubTypesOf(Object.class);
-//        Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(RpcService.class);
-//
-//        for (Class<?> type : annotated) {
-//            Object service = type.getDeclaredConstructor().newInstance();
-//            String serviceName = service.getClass().getAnnotation(RpcService.class).value();
-//            if (serviceName.isEmpty()) {
-//                serviceName = type.getSimpleName();
-//            }
-//
-//            services.put(serviceName, service);
-//        }
-//    }
 }

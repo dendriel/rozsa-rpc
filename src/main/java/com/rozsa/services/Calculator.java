@@ -1,6 +1,6 @@
 package com.rozsa.services;
 
-import com.rozsa.rpc.RpcService;
+import com.rozsa.rpc.annotations.RpcService;
 
 @RpcService("calc")
 public class Calculator {

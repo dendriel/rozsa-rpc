@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -26,7 +27,7 @@ public class HttpRequestHandler  implements HttpHandler {
         gson = new Gson();
     }
 
-    private List<Object> getParams(BufferedReader br, Class<?>[] paramTypes) throws IllegalArgumentException {
+    private List<Object> getParams(BufferedReader br, Type[] paramTypes) throws IllegalArgumentException {
 
         List<Object> params = new ArrayList<>();
         int paramTypesIndex = 0;
@@ -46,7 +47,7 @@ public class HttpRequestHandler  implements HttpHandler {
                 break;
             }
 
-            Class<?> type = paramTypes[paramTypesIndex++];
+            Type type = paramTypes[paramTypesIndex++];
 
             if (element.isJsonNull()) {
                 params.add(null);
@@ -56,7 +57,7 @@ public class HttpRequestHandler  implements HttpHandler {
                 params.add(param);
             }
             else if(element.isJsonArray()) {
-                Object[] param = (Object[])gson.fromJson(element.getAsJsonArray(), type);
+                Object param = gson.fromJson(element.getAsJsonArray(), type);
                 params.add(param);
             }
             else if(element.isJsonPrimitive()) {
@@ -99,7 +100,7 @@ public class HttpRequestHandler  implements HttpHandler {
         }
 
         String procedureName = pathParts[2];
-        Method m = dispatcher.getProcedure(serviceName, procedureName);
+        RpcServiceHandler.RpcProcedureHandler m = dispatcher.getProcedure(serviceName, procedureName);
         if (m == null) {
             sendError(t, HttpURLConnection.HTTP_NOT_FOUND, RpcErrors.PROCEDURE_NOT_FOUND);
             return;

@@ -1,5 +1,6 @@
 package com.rozsa.rpc;
 
+import com.rozsa.rpc.annotations.RpcService;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -8,12 +9,11 @@ import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Set;
 
 class RpcServicesLoader {
-    private final HashMap<String, Object> services;
+    private final HashMap<String, RpcServiceHandler> services;
 
     RpcServicesLoader() {
         this.services = new HashMap<>();
@@ -23,25 +23,17 @@ class RpcServicesLoader {
         return services.containsKey(serviceName);
     }
 
-    public Object getService(String serviceName) {
+    public RpcServiceHandler getService(String serviceName) {
         return services.get(serviceName);
     }
 
-    public Method getProcedure(String serviceName, String procedureName) {
-        Object service = services.get(serviceName);
+    public RpcServiceHandler.RpcProcedureHandler getProcedure(String serviceName, String procedureName) {
+        RpcServiceHandler service = services.get(serviceName);
         if (service == null) {
             return null;
         }
 
-        // TODO: map the methods.
-        Method[] methods = service.getClass().getMethods();
-        for (Method m : methods) {
-            if (m.getName().equals(procedureName)) {
-                return m;
-            }
-        }
-
-        return null;
+        return service.getProcedureByName(procedureName);
     }
 
     void load(String fromPackage) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
@@ -56,13 +48,16 @@ class RpcServicesLoader {
         Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(RpcService.class);
 
         for (Class<?> type : annotated) {
-            Object service = type.getDeclaredConstructor().newInstance();
-            String serviceName = service.getClass().getAnnotation(RpcService.class).value();
+            Object instance = type.getDeclaredConstructor().newInstance();
+            String serviceName = instance.getClass().getAnnotation(RpcService.class).value();
             if (serviceName.isEmpty()) {
                 serviceName = type.getSimpleName();
             }
 
-            services.put(serviceName, service);
+            RpcServiceHandler serviceInfo = new RpcServiceHandler(serviceName, instance);
+            serviceInfo.wrapUp();
+
+            services.put(serviceName, serviceInfo);
         }
     }
 }

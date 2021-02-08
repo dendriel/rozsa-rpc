@@ -1,10 +1,12 @@
 package com.rozsa.services;
 
-import com.rozsa.rpc.RpcService;
+import com.rozsa.rpc.annotations.RpcProcedure;
+import com.rozsa.rpc.annotations.RpcService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @RpcService
 public class Blog {
@@ -47,24 +49,32 @@ public class Blog {
         posts = new ArrayList<>();
     }
 
+    @RpcProcedure
     public void create(Post post) {
         posts.add(post);
     }
 
-    // TODO: allow user to specify object type to use lists.
-//    public void createAll(List<Post> post) {
-//        posts.addAll(post);
-//    }
+    @RpcProcedure
+    public void createAll(List<Post> post) {
+        posts.addAll(post);
+    }
 
-    public void createAll(Post[] post) {
+    @RpcProcedure
+    public void createAllArray(Post[] post) {
         posts.addAll(Arrays.asList(post));
     }
 
-    // TODO: allow to find method by parameters
+    @RpcProcedure
+    public void createAllMap(Map<String, Post> newPosts) {
+        posts.addAll(newPosts.values());
+    }
+
+    @RpcProcedure
     public List<Post> read(int count) {
         return posts;
     }
 
+    @RpcProcedure
     public List<Post> read() {
         return posts;
     }
