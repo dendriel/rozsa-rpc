@@ -60,7 +60,12 @@ public class Blog {
         posts.addAll(Arrays.asList(post));
     }
 
+    // TODO: allow to find method by parameters
     public List<Post> read(int count) {
+        return posts;
+    }
+
+    public List<Post> read() {
         return posts;
     }
 }

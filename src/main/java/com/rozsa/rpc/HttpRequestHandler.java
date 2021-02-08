@@ -8,7 +8,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -18,7 +17,7 @@ import java.util.List;
 
 public class HttpRequestHandler  implements HttpHandler {
 
-    private Gson gson;
+    private final Gson gson;
 
     private final RpcDispatcher dispatcher;
 
@@ -27,19 +26,22 @@ public class HttpRequestHandler  implements HttpHandler {
         gson = new Gson();
     }
 
-    private List<Object> getParams(BufferedReader br, Class<?>[] paramTypes) {
+    private List<Object> getParams(BufferedReader br, Class<?>[] paramTypes) throws IllegalArgumentException {
 
         List<Object> params = new ArrayList<>();
         int paramTypesIndex = 0;
 
+        if (paramTypes.length == 0) {
+            return params;
+        }
+
         JsonArray jsonArray = JsonParser.parseReader(br).getAsJsonArray();
 
         if (paramTypes.length != jsonArray.size()) {
-            throw new IllegalArgumentException("Unexpected number of paramenters. Expected: " + paramTypes.length + "; Received: " + jsonArray.size());
+            throw new IllegalArgumentException("Unexpected number of parameters. Expected: " + paramTypes.length + "; Received: " + jsonArray.size());
         }
 
         for (JsonElement element : jsonArray) {
-
             if (paramTypesIndex >= paramTypes.length) {
                 break;
             }
@@ -48,7 +50,6 @@ public class HttpRequestHandler  implements HttpHandler {
 
             if (element.isJsonNull()) {
                 params.add(null);
-                continue;
             }
             else if (element.isJsonObject()) {
                 Object param = gson.fromJson(element.getAsJsonObject(), type);
@@ -71,17 +72,9 @@ public class HttpRequestHandler  implements HttpHandler {
     public void handle(HttpExchange t) throws IOException {
         try {
             doHhandle(t);
-        } catch (Exception e) {
-            String message = e.getMessage();
-
-            t.getResponseHeaders().add("Content-Type", "text/plain");
-            t.sendResponseHeaders(HttpURLConnection.HTTP_INTERNAL_ERROR, message.length());
-            OutputStream os = t.getResponseBody();
-            os.write(message.getBytes());
-            os.close();
-            t.close();
-
-            System.out.println(e + "\n");
+        }
+        catch (Exception e) {
+            sendError(t, HttpURLConnection.HTTP_INTERNAL_ERROR, e.getMessage());
             e.printStackTrace();
         }
     }
@@ -95,53 +88,61 @@ public class HttpRequestHandler  implements HttpHandler {
         String[] pathParts = path.split("/");
 
         if (pathParts.length <= 2) {
-            t.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
-            t.close();
+            sendError(t, HttpURLConnection.HTTP_BAD_REQUEST, RpcErrors.INVALID_ACTION);
             return;
         }
 
         String serviceName = pathParts[1];
-        String procedureName = pathParts[2];
-
         if (!dispatcher.hasService(serviceName)) {
-            t.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
-            t.close();
+            sendError(t, HttpURLConnection.HTTP_NOT_FOUND, RpcErrors.SERVICE_NOT_FOUND);
             return;
         }
 
+        String procedureName = pathParts[2];
         Method m = dispatcher.getProcedure(serviceName, procedureName);
         if (m == null) {
-            t.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
-            t.close();
+            sendError(t, HttpURLConnection.HTTP_NOT_FOUND, RpcErrors.PROCEDURE_NOT_FOUND);
             return;
         }
-
-        List<Object> params = getParams(br, m.getParameterTypes());
 
         Object res;
         try {
+            List<Object> params = getParams(br, m.getParameterTypes());
             res = dispatcher.run(serviceName, procedureName, params);
-        } catch (NoSuchMethodError e) {
-            e.printStackTrace();
-            t.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
-            t.close();
+        }
+        catch (IllegalArgumentException e) {
+            sendError(t, HttpURLConnection.HTTP_BAD_REQUEST, RpcErrors.INVALID_ARGS_COUNT);
+            return;
+        }
+        catch (NoSuchMethodError e) {
+            sendError(t, HttpURLConnection.HTTP_NOT_FOUND, RpcErrors.PROCEDURE_NOT_FOUND);
             return;
         }
         catch (Exception e) {
+            sendError(t, HttpURLConnection.HTTP_INTERNAL_ERROR, e.getMessage());
             e.printStackTrace();
-            t.sendResponseHeaders(HttpURLConnection.HTTP_INTERNAL_ERROR, 0);
-            t.close();
             return;
         }
 
-        ResultDto result = new ResultDto();
-        result.setRes(res);
+        ResultDto result = new ResultDto(res);
         String resultRaw = gson.toJson(result);
 
-        t.getResponseHeaders().add("Content-Type", "application/json");
-        t.sendResponseHeaders(HttpURLConnection.HTTP_OK, resultRaw.length());
+        sendSuccess(t, resultRaw);
+    }
+
+    private void sendError(HttpExchange t, final int errorCode, final String errorMessage) throws IOException {
+        sendResponse(t, errorCode, errorMessage, "text/plain");
+    }
+
+    private void sendSuccess(HttpExchange t, String data) throws IOException {
+        sendResponse(t, HttpURLConnection.HTTP_OK, data, "application/json");
+    }
+
+    private void sendResponse(HttpExchange t, int code, String data, String contentType) throws IOException {
+        t.getResponseHeaders().add("Content-Type", contentType);
+        t.sendResponseHeaders(code, data.length());
         OutputStream os = t.getResponseBody();
-        os.write(resultRaw.getBytes());
+        os.write(data.getBytes());
         os.close();
         t.close();
     }

@@ -17,22 +17,6 @@ public class RpcDispatcher {
         return services.containsKey(serviceName);
     }
 
-    public boolean hasProcedure(String serviceName, String procedureName) {
-        Object service = services.get(serviceName);
-        if (service == null) {
-            return false;
-        }
-
-        Method[] methods = service.getClass().getMethods();
-        for (Method m : methods) {
-            if (m.getName().equals(procedureName)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public Method getProcedure(String serviceName, String procedureName) {
         Object service = services.get(serviceName);
         if (service == null) {
