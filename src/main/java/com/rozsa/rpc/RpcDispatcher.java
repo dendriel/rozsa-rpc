@@ -3,39 +3,25 @@ package com.rozsa.rpc;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Map;
 
-public class RpcDispatcher {
+class RpcDispatcher {
 
-    private final Map<String, Object> services;
+    private final RpcServicesLoader servicesLoader;
 
-    public RpcDispatcher(Map<String, Object> services) {
-        this.services = services;
+    public RpcDispatcher(RpcServicesLoader servicesLoader) {
+        this.servicesLoader = servicesLoader;
     }
 
     public boolean hasService(String serviceName) {
-        return services.containsKey(serviceName);
+        return servicesLoader.hasService(serviceName);
     }
 
     public Method getProcedure(String serviceName, String procedureName) {
-        Object service = services.get(serviceName);
-        if (service == null) {
-            return null;
-        }
-
-        // TODO: map the methods.
-        Method[] methods = service.getClass().getMethods();
-        for (Method m : methods) {
-            if (m.getName().equals(procedureName)) {
-                return m;
-            }
-        }
-
-        return null;
+        return servicesLoader.getProcedure(serviceName, procedureName);
     }
 
     public Object run(String serviceName, String procedureName, List<Object> params) throws InvocationTargetException, IllegalAccessException, NoSuchMethodError {
-        Object service = services.get(serviceName);
+        Object service = servicesLoader.getService(serviceName);
 
         Method m = getProcedure(serviceName, procedureName);
         if (m == null) {
