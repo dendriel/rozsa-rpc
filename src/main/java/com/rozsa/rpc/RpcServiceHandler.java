@@ -53,16 +53,6 @@ class RpcServiceHandler {
         return procedureHandler;
     }
 
-
-    public Object invoke(String procedureName, List<Object> params) throws InvocationTargetException, IllegalAccessException {
-        RpcProcedureHandler m = getProcedureByName(procedureName);
-        if (m == null) {
-            throw new NoSuchMethodError();
-        }
-
-        return m.invoke(params);
-    }
-
     public RpcProcedureHandler getProcedureByName(String procedureName) {
         List<RpcProcedureHandler> procedureHandlers = procedures.get(procedureName);
         if (procedureHandlers == null) {
@@ -73,9 +63,19 @@ class RpcServiceHandler {
         return procedureHandlers.get(0);
     }
 
+    public List<RpcProcedureHandler> getProcedures(String procedureName) {
+        List<RpcProcedureHandler> procedureHandlers = procedures.get(procedureName);
+        if (procedureHandlers == null) {
+            return new ArrayList<>();
+        }
+
+        return procedureHandlers;
+    }
+
     public class RpcProcedureHandler {
         private final String procedureName;
         private final Method method;
+        private Type[] paramTypes;
 
         public RpcProcedureHandler(String procedureName, Method method) {
             this.procedureName = procedureName;
@@ -86,23 +86,16 @@ class RpcServiceHandler {
             return procedureName;
         }
 
-        private Object invoke(List<Object> params) throws InvocationTargetException, IllegalAccessException {
+        public Object run(List<Object> params) throws InvocationTargetException, IllegalAccessException {
             return method.invoke(instance, params.toArray(new Object[0]));
         }
 
         public Type[] getParameterTypes() {
-            return method.getGenericParameterTypes();
+            return paramTypes;
         }
 
         private void wrapUp() {
-            // TODO: use method.getGenericParameterTypes()
-//            for (Class<?> paramType : method.getParameterTypes()) {
-//                System.out.println(paramType);
-//            }
-
-            for (Type paramType : method.getGenericParameterTypes()) {
-                System.out.println(paramType);
-            }
+            paramTypes = method.getGenericParameterTypes();
         }
     }
 }

@@ -8,65 +8,21 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class HttpRequestHandler  implements HttpHandler {
-
     private final Gson gson;
+    private final RpcServicesLoader servicesLoader;
+    private final ProcedureParametersParser parametersParser;
 
-    private final RpcDispatcher dispatcher;
+    protected HttpRequestHandler(RpcServicesLoader servicesLoader) {
+        this.servicesLoader = servicesLoader;
 
-    protected HttpRequestHandler(RpcDispatcher dispatcher) {
-        this.dispatcher = dispatcher;
         gson = new Gson();
-    }
-
-    private List<Object> getParams(BufferedReader br, Type[] paramTypes) throws IllegalArgumentException {
-
-        List<Object> params = new ArrayList<>();
-        int paramTypesIndex = 0;
-
-        if (paramTypes.length == 0) {
-            return params;
-        }
-
-        JsonArray jsonArray = JsonParser.parseReader(br).getAsJsonArray();
-
-        if (paramTypes.length != jsonArray.size()) {
-            throw new IllegalArgumentException("Unexpected number of parameters. Expected: " + paramTypes.length + "; Received: " + jsonArray.size());
-        }
-
-        for (JsonElement element : jsonArray) {
-            if (paramTypesIndex >= paramTypes.length) {
-                break;
-            }
-
-            Type type = paramTypes[paramTypesIndex++];
-
-            if (element.isJsonNull()) {
-                params.add(null);
-            }
-            else if (element.isJsonObject()) {
-                Object param = gson.fromJson(element.getAsJsonObject(), type);
-                params.add(param);
-            }
-            else if(element.isJsonArray()) {
-                Object param = gson.fromJson(element.getAsJsonArray(), type);
-                params.add(param);
-            }
-            else if(element.isJsonPrimitive()) {
-                Object param = gson.fromJson(element.getAsJsonPrimitive(), type);
-                params.add(param);
-            }
-        }
-
-        return params;
+        parametersParser = new ProcedureParametersParser(gson);
     }
 
     @Override
@@ -94,28 +50,32 @@ public class HttpRequestHandler  implements HttpHandler {
         }
 
         String serviceName = pathParts[1];
-        if (!dispatcher.hasService(serviceName)) {
+        RpcServiceHandler service = servicesLoader.getService(serviceName);
+        if (service == null) {
             sendError(t, HttpURLConnection.HTTP_NOT_FOUND, RpcErrors.SERVICE_NOT_FOUND);
             return;
         }
 
         String procedureName = pathParts[2];
-        RpcServiceHandler.RpcProcedureHandler m = dispatcher.getProcedure(serviceName, procedureName);
-        if (m == null) {
+        List<RpcServiceHandler.RpcProcedureHandler> procedures = service.getProcedures(procedureName);
+        if (procedures.size() == 0) {
             sendError(t, HttpURLConnection.HTTP_NOT_FOUND, RpcErrors.PROCEDURE_NOT_FOUND);
             return;
         }
 
         Object res;
         try {
-            List<Object> params = getParams(br, m.getParameterTypes());
-            res = dispatcher.run(serviceName, procedureName, params);
+            JsonArray jsonArray = JsonParser.parseReader(br).getAsJsonArray();
+            RpcServiceHandler.RpcProcedureHandler target = parametersParser.findProcedureByArgs(jsonArray, procedures);
+
+            List<Object> params = parametersParser.getParams(jsonArray, target.getParameterTypes());
+            res = target.run(params);
         }
         catch (IllegalArgumentException e) {
-            sendError(t, HttpURLConnection.HTTP_BAD_REQUEST, RpcErrors.INVALID_ARGS_COUNT);
+            sendError(t, HttpURLConnection.HTTP_BAD_REQUEST, RpcErrors.INVALID_ARGS_LIST);
             return;
         }
-        catch (NoSuchMethodError e) {
+        catch (NoSuchMethodException e) {
             sendError(t, HttpURLConnection.HTTP_NOT_FOUND, RpcErrors.PROCEDURE_NOT_FOUND);
             return;
         }

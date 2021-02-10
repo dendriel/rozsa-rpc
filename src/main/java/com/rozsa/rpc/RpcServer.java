@@ -45,8 +45,7 @@ public class RpcServer {
 
         RpcServicesLoader servicesLoader = new RpcServicesLoader();
         servicesLoader.load(fromPackage);
-        RpcDispatcher dispatcher = new RpcDispatcher(servicesLoader);
-        HttpRequestHandler handler = new HttpRequestHandler(dispatcher);
+        HttpRequestHandler handler = new HttpRequestHandler(servicesLoader);
 
         server.createContext("/", handler);
         server.setExecutor(null); // creates a default executor

@@ -19,21 +19,8 @@ class RpcServicesLoader {
         this.services = new HashMap<>();
     }
 
-    public boolean hasService(String serviceName) {
-        return services.containsKey(serviceName);
-    }
-
     public RpcServiceHandler getService(String serviceName) {
         return services.get(serviceName);
-    }
-
-    public RpcServiceHandler.RpcProcedureHandler getProcedure(String serviceName, String procedureName) {
-        RpcServiceHandler service = services.get(serviceName);
-        if (service == null) {
-            return null;
-        }
-
-        return service.getProcedureByName(procedureName);
     }
 
     void load(String fromPackage) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {

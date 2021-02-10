@@ -3,10 +3,7 @@ package com.rozsa.services;
 import com.rozsa.rpc.annotations.RpcProcedure;
 import com.rozsa.rpc.annotations.RpcService;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RpcService
 public class Blog {
@@ -70,12 +67,48 @@ public class Blog {
     }
 
     @RpcProcedure
+    public List<Post> read(List<Integer> count) {
+        return posts;
+    }
+
+    @RpcProcedure
+    public List<Post> read(List<Integer> count, int a) {
+        return posts;
+    }
+
+    @RpcProcedure
     public List<Post> read(int count) {
         return posts;
     }
 
     @RpcProcedure
+    public List<Post> read(String count) {
+        return posts;
+    }
+
+    @RpcProcedure
     public List<Post> read() {
+        return posts;
+    }
+
+
+    @RpcProcedure
+    public List<Post> read(Map<String, Integer> count) {
+        return posts;
+    }
+
+    @RpcProcedure
+    public List<Post> read(Collection<String> count) {
+        return posts;
+    }
+
+    @RpcProcedure
+    public List<Post> read(Queue<String> count) {
+        return posts;
+    }
+
+    @RpcProcedure
+    public List<Post> read(Map<Integer, String> count, int a, int b) {
         return posts;
     }
 }
