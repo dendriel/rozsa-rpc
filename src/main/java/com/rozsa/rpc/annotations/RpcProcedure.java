@@ -8,5 +8,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface RpcProcedure {
-    String name () default "";
+    /**
+     * Override procedure name used in RPC.
+     */
+    String value() default "";
 }

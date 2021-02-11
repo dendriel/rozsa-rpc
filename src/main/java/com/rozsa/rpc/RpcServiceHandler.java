@@ -43,7 +43,7 @@ class RpcServiceHandler {
             return null;
         }
 
-        String procedureName = procedure.name();
+        String procedureName = procedure.value();
         if (procedureName.isEmpty()) {
             procedureName = m.getName();
         }
@@ -51,16 +51,6 @@ class RpcServiceHandler {
         RpcProcedureHandler procedureHandler = this.new RpcProcedureHandler(procedureName, m);
         procedureHandler.wrapUp();
         return procedureHandler;
-    }
-
-    public RpcProcedureHandler getProcedureByName(String procedureName) {
-        List<RpcProcedureHandler> procedureHandlers = procedures.get(procedureName);
-        if (procedureHandlers == null) {
-            return null;
-        }
-
-        // TODO: find procedure handler by parameters.
-        return procedureHandlers.get(0);
     }
 
     public List<RpcProcedureHandler> getProcedures(String procedureName) {

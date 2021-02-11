@@ -91,7 +91,6 @@ public class Blog {
         return posts;
     }
 
-
     @RpcProcedure
     public List<Post> read(Map<String, Integer> count) {
         return posts;
@@ -111,4 +110,20 @@ public class Blog {
     public List<Post> read(Map<Integer, String> count, int a, int b) {
         return posts;
     }
+
+    @RpcProcedure
+    public List<Post> read(double a, Deque<Integer> count) {
+        return posts;
+    }
+
+    @RpcProcedure
+    public List<Post> read(double a, int b, Set<Integer> count) {
+        return posts;
+    }
+
+    @RpcProcedure
+    public List<Post> read(double a, Integer[] count, int b) {
+        return posts;
+    }
+
 }

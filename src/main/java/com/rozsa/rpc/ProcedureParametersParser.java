@@ -36,13 +36,14 @@ class ProcedureParametersParser {
     private boolean isArray(Type type) {
         if (type instanceof ParameterizedTypeImpl) {
             Class<?> rawType = ((ParameterizedTypeImpl) type).getRawType();
-            return rawType == List.class || rawType == Collection.class ||
-                    rawType == Queue.class;
+            /* Could have used something more generic, but it would made it more complex.
+              * For instance: rawType.getSuperclass().[...] .getSuperclass().isAssignableFrom(Collection.class)
+              */
+            return rawType == List.class || rawType == Collection.class || rawType == Queue.class ||
+                    rawType == Deque.class || rawType == Set.class;
         }
 
-        // Map.class is an json object.
-
-        return false;
+        return ((Class) type).isArray();
     }
 
     private boolean isNotArray(Type type) {
@@ -76,7 +77,7 @@ class ProcedureParametersParser {
                 .collect(Collectors.toList());
     }
 
-    // We could create a hash from paramenter types at wrapUp to avoid searching through procedures every time. But hash would not work well when receiving NULL args.
+    // We could create a hash from parameter types at wrapUp to avoid searching through procedures every time. But hash would not work well when receiving NULL args.
     public RpcServiceHandler.RpcProcedureHandler findProcedureByArgs(JsonArray jsonArray, final List<RpcServiceHandler.RpcProcedureHandler> procedures)
             throws IllegalArgumentException, NoSuchMethodException {
         if (procedures.size() == 1) {
