@@ -1,7 +1,6 @@
 package com.rozsa;
 
 import com.rozsa.rpc.RpcServer;
-
 import java.lang.reflect.InvocationTargetException;
 
 public class Main {
@@ -11,8 +10,7 @@ public class Main {
 
 //        rpc.start("com.rozsa.services");
         // or
-        rpc.start("com.rozsa.services.blog");
-        rpc.start("com.rozsa.services.calc");
+        rpc.start("com.rozsa.services.blog", "com.rozsa.services.calc");
 
         System.out.println("Server is running!");
     }

@@ -12,6 +12,86 @@ Simple java HTTP-based RPC library.
 - Allow data structures (Array, List, Map, etc);
 - Allow procedure overloading.
 
+## Usage
+
+Having a properly annotated service:
+
+```Java
+package com.rozsa.services.calc;
+
+import com.rozsa.rpc.annotations.RpcProcedure;
+import com.rozsa.rpc.annotations.RpcService;
+
+@RpcService("calc")
+public class Calculator {
+
+    @RpcProcedure
+    public int sum(int a, int b) {
+        return a + b;
+    }
+
+    // It is possible to use an alias instead of the method name.
+    @RpcProcedure("sub")
+    public int subtraction(int a, int b) {
+        return a - b;
+    }
+
+    @RpcProcedure
+    public List<Integer> sum(List<Integer> a, Integer b) {
+      List<Integer> result = new ArrayList<>();
+      for (Integer integer : a) {
+        Integer sum = integer + b;
+        result.add(sum);
+      }
+  
+      return result;
+    }
+
+    @RpcProcedure
+    public void printPi() {
+        System.out.println(Math.PI);
+    }
+    
+    // Won't be available as a procedure because it's not annotated with @RpcProcedure
+    public double getPi() {
+        return Math.PI;
+    }
+}
+```
+
+You may setup the server as follows:
+
+```Java
+package com.rozsa;
+
+import com.rozsa.rpc.RpcServer;
+import java.lang.reflect.InvocationTargetException;
+
+public class Main {
+    public static void main(String[] args) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        RpcServer rpc = new RpcServer(8000);
+        rpc.start("com.rozsa.services");
+        System.out.println("Server is running!");
+    }
+}
+```
+
+Invoke "calc" service as:
+
+- Request: ``GET http://localhost/calc/sum/10/20``
+- Response: ``HTTP 200 - JSON response content: { "res": 30 }``
+
+
+- Request: ``GET http://localhost/calc/sub/10/20``
+- Response: ``HTTP 200 - JSON response content: { "res": -10 }``
+
+
+- Request: ``POST http://localhost/calc/sum - JSON body content: [ [ 1, 2, 3, 4], 10 ]``
+- Response: ``HTTP 200 - JSON response content: { "res": [ 11, 12, 13, 14 ] }``
+
+
+- Request: ``GET http://localhost/calc/printPi``
+- Response: ``HTTP 204 - no response content``
 
 ## GET/POST Requests
 
@@ -37,7 +117,6 @@ public void createAll(List<Post> post, Date createdAt); // test with a date.
 May be invoked by using ``http://localhost/serviceName/createAll`` with the following request content:
 ```JSON
 [
-  // First argument - Array (List<T>)
     [
         
         {
@@ -51,7 +130,6 @@ May be invoked by using ``http://localhost/serviceName/createAll`` with the foll
             "stars": 5
         }
     ],
-  // Second argument - Primitive (Date)
     "2021-02-15T11:40:15.1234-03:00"
 ]
 ```
@@ -116,5 +194,5 @@ For instance: ``2021-02-15T11:40:15.1234-03:00``
 - Add client API builder
   - Add Sync and Async method calls
   - Add reactive apis
-- Add usage instructions with code examples;
-- Decouple transport code to allow using other implementations.
+- Decouple transport code to allow using other implementations;
+- Create error codes sections.
