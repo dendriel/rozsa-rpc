@@ -6,4 +6,5 @@ class RpcErrors {
     public static final String INVALID_ACTION = "Service or procedure is missing from request URI path.";
     public static final String INVALID_ARGS_COUNT = "Received invalid number of arguments.";
     public static final String INVALID_ARGS_LIST = "Arguments list matches more than one method!";
+    public static final String INVALID_REQUEST_METHOD = "Only GET and POST are handled by the server.";
 }

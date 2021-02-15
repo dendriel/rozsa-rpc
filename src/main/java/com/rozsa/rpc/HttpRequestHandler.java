@@ -21,7 +21,7 @@ public class HttpRequestHandler  implements HttpHandler {
     protected HttpRequestHandler(RpcServicesLoader servicesLoader) {
         this.servicesLoader = servicesLoader;
 
-        gson = new Gson();
+        gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").create();
         parametersParser = new ProcedureParametersParser(gson);
     }
 
@@ -31,7 +31,7 @@ public class HttpRequestHandler  implements HttpHandler {
             doHhandle(t);
         }
         catch (Exception e) {
-            sendError(t, HttpURLConnection.HTTP_INTERNAL_ERROR, e.getMessage());
+            sendError(t, HttpURLConnection.HTTP_INTERNAL_ERROR, e.toString());
             e.printStackTrace();
         }
     }
@@ -43,30 +43,39 @@ public class HttpRequestHandler  implements HttpHandler {
         URI uri = t.getRequestURI();
         String path = uri.getPath();
         String[] pathParts = path.split("/");
+        int pathPartsIdx = 1;
 
         if (pathParts.length <= 2) {
             sendError(t, HttpURLConnection.HTTP_BAD_REQUEST, RpcErrors.INVALID_ACTION);
             return;
         }
 
-        String serviceName = pathParts[1];
+        // TODO: test contentType
+
+        String serviceName = pathParts[pathPartsIdx++];
         RpcServiceHandler service = servicesLoader.getService(serviceName);
         if (service == null) {
             sendError(t, HttpURLConnection.HTTP_NOT_FOUND, RpcErrors.SERVICE_NOT_FOUND);
             return;
         }
 
-        String procedureName = pathParts[2];
+        String procedureName = pathParts[pathPartsIdx++];
         List<RpcServiceHandler.RpcProcedureHandler> procedures = service.getProcedures(procedureName);
         if (procedures.size() == 0) {
             sendError(t, HttpURLConnection.HTTP_NOT_FOUND, RpcErrors.PROCEDURE_NOT_FOUND);
             return;
         }
 
+        String method = t.getRequestMethod();
+        JsonArray jsonArray = getRawParamsByMethod(method, br, pathParts, pathPartsIdx);
+        if (jsonArray == null) {
+            sendError(t, HttpURLConnection.HTTP_BAD_METHOD, RpcErrors.INVALID_REQUEST_METHOD);
+            return;
+        }
+
         boolean hasResponse;
         Object response;
         try {
-            JsonArray jsonArray = JsonParser.parseReader(br).getAsJsonArray();
             RpcServiceHandler.RpcProcedureHandler targetProcedure = parametersParser.findProcedureByArgs(jsonArray, procedures);
 
             List<Object> params = parametersParser.getParams(jsonArray, targetProcedure.getParameterTypes());
@@ -82,7 +91,7 @@ public class HttpRequestHandler  implements HttpHandler {
             return;
         }
         catch (Exception e) {
-            sendError(t, HttpURLConnection.HTTP_INTERNAL_ERROR, e.getMessage());
+            sendError(t, HttpURLConnection.HTTP_INTERNAL_ERROR, e.toString());
             e.printStackTrace();
             return;
         }
@@ -95,7 +104,27 @@ public class HttpRequestHandler  implements HttpHandler {
         }
     }
 
-    private void sendError(HttpExchange t, final int errorCode, final String errorMessage) throws IOException {
+    private JsonArray getRawParamsByMethod(String method, BufferedReader br, String[] pathParts, int startIdx) {
+        if (method.equals("POST")) {
+            return JsonParser.parseReader(br).getAsJsonArray();
+        }
+        else if (method.equals("GET")) {
+            return convertURIArgsToJsonArray(pathParts, startIdx);
+        }
+        else {
+            return null;
+        }
+    }
+
+    private JsonArray convertURIArgsToJsonArray(String[] args, int startIdx) {
+        args = Arrays.copyOfRange(args, startIdx, args.length);
+        List<Object> jsonArgs = Arrays.asList(args);
+
+        JsonElement element = gson.toJsonTree(jsonArgs);
+        return element.getAsJsonArray();
+    }
+
+    private void sendError(HttpExchange t, final int errorCode, String errorMessage) throws IOException {
         sendResponse(t, errorCode, errorMessage, "text/plain");
     }
 

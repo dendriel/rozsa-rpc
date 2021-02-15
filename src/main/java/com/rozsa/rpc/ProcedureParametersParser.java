@@ -26,7 +26,7 @@ class ProcedureParametersParser {
                 type == Byte.class || type == Boolean.class || type == String.class ||
                 type == double.class || type == float.class || type == long.class ||
                 type == int.class || type == short.class || type == char.class ||
-                type == byte.class || type == boolean.class;
+                type == byte.class || type == boolean.class || type == Date.class;
     }
 
     private boolean isNotPrimitive(Type type) {

@@ -12,6 +12,7 @@ public class Blog {
         private String text;
         private String author;
         private String stars;
+        private Date createdAt;
 
         public String getText() {
             return text;
@@ -36,6 +37,14 @@ public class Blog {
         public void setStars(String stars) {
             this.stars = stars;
         }
+
+        public Date getCreatedAt() {
+            return createdAt;
+        }
+
+        public void setCreatedAt(Date createdAt) {
+            this.createdAt = createdAt;
+        }
     }
 
 
@@ -53,6 +62,12 @@ public class Blog {
 
     @RpcProcedure
     public void createAll(List<Post> post) {
+        posts.addAll(post);
+    }
+
+    @RpcProcedure
+    public void createAll(List<Post> post, Date createdAt) {
+        post.forEach(p -> p.setCreatedAt(createdAt));
         posts.addAll(post);
     }
 
@@ -83,6 +98,11 @@ public class Blog {
 
     @RpcProcedure
     public List<Post> read(String count) {
+        return posts;
+    }
+
+    @RpcProcedure
+    public List<Post> read(String input, int count) {
         return posts;
     }
 
