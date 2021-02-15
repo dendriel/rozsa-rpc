@@ -63,13 +63,15 @@ public class HttpRequestHandler  implements HttpHandler {
             return;
         }
 
-        Object res;
+        boolean hasResponse;
+        Object response;
         try {
             JsonArray jsonArray = JsonParser.parseReader(br).getAsJsonArray();
-            RpcServiceHandler.RpcProcedureHandler target = parametersParser.findProcedureByArgs(jsonArray, procedures);
+            RpcServiceHandler.RpcProcedureHandler targetProcedure = parametersParser.findProcedureByArgs(jsonArray, procedures);
 
-            List<Object> params = parametersParser.getParams(jsonArray, target.getParameterTypes());
-            res = target.run(params);
+            List<Object> params = parametersParser.getParams(jsonArray, targetProcedure.getParameterTypes());
+            response = targetProcedure.run(params);
+            hasResponse = targetProcedure.hasResponse();
         }
         catch (IllegalArgumentException e) {
             sendError(t, HttpURLConnection.HTTP_BAD_REQUEST, RpcErrors.INVALID_ARGS_LIST);
@@ -85,18 +87,23 @@ public class HttpRequestHandler  implements HttpHandler {
             return;
         }
 
-        ResultDto result = new ResultDto(res);
-        String resultRaw = gson.toJson(result);
-
-        sendSuccess(t, resultRaw);
+        if (!hasResponse) {
+            sendSuccessNotContent(t);
+        }
+        else {
+            sendSuccess(t, response);
+        }
     }
 
     private void sendError(HttpExchange t, final int errorCode, final String errorMessage) throws IOException {
         sendResponse(t, errorCode, errorMessage, "text/plain");
     }
 
-    private void sendSuccess(HttpExchange t, String data) throws IOException {
-        sendResponse(t, HttpURLConnection.HTTP_OK, data, "application/json");
+    private void sendSuccess(HttpExchange t, Object response) throws IOException {
+        ResultDto result = new ResultDto(response);
+        String resultRaw = gson.toJson(result);
+
+        sendResponse(t, HttpURLConnection.HTTP_OK, resultRaw, "application/json");
     }
 
     private void sendResponse(HttpExchange t, int code, String data, String contentType) throws IOException {
@@ -105,6 +112,12 @@ public class HttpRequestHandler  implements HttpHandler {
         OutputStream os = t.getResponseBody();
         os.write(data.getBytes());
         os.close();
+        t.close();
+    }
+
+
+    private void sendSuccessNotContent(HttpExchange t) throws IOException {
+        t.sendResponseHeaders(HttpURLConnection.HTTP_NO_CONTENT, 0);;
         t.close();
     }
 }

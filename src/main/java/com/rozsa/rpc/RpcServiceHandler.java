@@ -66,6 +66,7 @@ class RpcServiceHandler {
         private final String procedureName;
         private final Method method;
         private Type[] paramTypes;
+        private boolean hasResponse;
 
         public RpcProcedureHandler(String procedureName, Method method) {
             this.procedureName = procedureName;
@@ -76,6 +77,11 @@ class RpcServiceHandler {
             return procedureName;
         }
 
+        private void wrapUp() {
+            paramTypes = method.getGenericParameterTypes();
+            hasResponse = method.getReturnType() != void.class;
+        }
+
         public Object run(List<Object> params) throws InvocationTargetException, IllegalAccessException {
             return method.invoke(instance, params.toArray(new Object[0]));
         }
@@ -84,8 +90,8 @@ class RpcServiceHandler {
             return paramTypes;
         }
 
-        private void wrapUp() {
-            paramTypes = method.getGenericParameterTypes();
+        public boolean hasResponse() {
+            return hasResponse;
         }
     }
 }

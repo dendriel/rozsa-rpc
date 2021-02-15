@@ -55,5 +55,5 @@ Also, null arguments are a permitted and will be matched with any of the availab
 - Add client API builder
   - Add Sync and Async method calls
   - Add reactive apis
-- Review available Array types;
-- Allow to setup multiple packages.
+- Allow to setup multiple packages;
+- Add usage instructions with code examples.
