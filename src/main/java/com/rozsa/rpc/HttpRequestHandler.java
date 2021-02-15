@@ -129,9 +129,7 @@ public class HttpRequestHandler  implements HttpHandler {
     }
 
     private void sendSuccess(HttpExchange t, Object response) throws IOException {
-        ResultDto result = new ResultDto(response);
-        String resultRaw = gson.toJson(result);
-
+        String resultRaw = gson.toJson(response);
         sendResponse(t, HttpURLConnection.HTTP_OK, resultRaw, "application/json");
     }
 

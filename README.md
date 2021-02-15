@@ -79,15 +79,15 @@ public class Main {
 Invoke "calc" service as:
 
 - Request: ``GET http://localhost/calc/sum/10/20``
-- Response: ``HTTP 200 - JSON response content: { "res": 30 }``
+- Response: ``HTTP 200 - JSON response content: 30``
 
 
 - Request: ``GET http://localhost/calc/sub/10/20``
-- Response: ``HTTP 200 - JSON response content: { "res": -10 }``
+- Response: ``HTTP 200 - JSON response content: -10``
 
 
 - Request: ``POST http://localhost/calc/sum - JSON body content: [ [ 1, 2, 3, 4], 10 ]``
-- Response: ``HTTP 200 - JSON response content: { "res": [ 11, 12, 13, 14 ] }``
+- Response: ``HTTP 200 - JSON response content: [ 11, 12, 13, 14 ]``
 
 
 - Request: ``GET http://localhost/calc/printPi``
@@ -195,4 +195,4 @@ For instance: ``2021-02-15T11:40:15.1234-03:00``
   - Add Sync and Async method calls
   - Add reactive apis
 - Decouple transport code to allow using other implementations;
-- Create error codes sections.
+- Create error codes sections for doc.
