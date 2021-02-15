@@ -29,12 +29,12 @@ public class RpcServer {
         this.port = port;
     }
 
-    public void start(String fromPackage) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        wrapUp(ip, port, fromPackage);
+    public void start(String... fromPackages) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        wrapUp(ip, port, fromPackages);
         server.start();
     }
 
-    private void wrapUp(String ip, int port, String fromPackage) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    private void wrapUp(String ip, int port, String[] fromPackages) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         try {
             InetSocketAddress address = new InetSocketAddress(ip, port);
             server = HttpServer.create(address, defaultMaximumConnections);
@@ -43,8 +43,7 @@ public class RpcServer {
             return;
         }
 
-        RpcServicesLoader servicesLoader = new RpcServicesLoader();
-        servicesLoader.load(fromPackage);
+        RpcServicesLoader servicesLoader = new RpcServicesLoader(fromPackages);
         HttpRequestHandler handler = new HttpRequestHandler(servicesLoader);
 
         server.createContext("/", handler);

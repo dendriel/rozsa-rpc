@@ -14,24 +14,33 @@ import java.util.Set;
 
 class RpcServicesLoader {
     private final HashMap<String, RpcServiceHandler> services;
+    private final String[] packages;
 
-    RpcServicesLoader() {
+    RpcServicesLoader(String... packages) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        this.packages = packages;
         this.services = new HashMap<>();
+
+        wrapUp();
     }
 
     public RpcServiceHandler getService(String serviceName) {
         return services.get(serviceName);
     }
 
-    void load(String fromPackage) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    private void wrapUp() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        for (String p : packages) {
+            load(p);
+        }
+    }
+
+    private void load(String fromPackage) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         Reflections reflections = new Reflections(new ConfigurationBuilder()
                 .setUrls(ClasspathHelper.forPackage(fromPackage))
                 .setScanners(new SubTypesScanner(),
-                        new TypeAnnotationsScanner()) //.filterResultsBy(optionalFilter)),
+                        new TypeAnnotationsScanner())
                 .filterInputsBy(new FilterBuilder().includePackage(fromPackage))
         );
 
-//        Set<Class<? extends Object>> sr = reflections.getSubTypesOf(Object.class);
         Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(RpcService.class);
 
         for (Class<?> type : annotated) {

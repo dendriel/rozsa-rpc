@@ -8,7 +8,11 @@ public class Main {
 
     public static void main(String[] args) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
         RpcServer rpc = new RpcServer(8000);
-        rpc.start("com.rozsa.services");
+
+//        rpc.start("com.rozsa.services");
+        // or
+        rpc.start("com.rozsa.services.blog");
+        rpc.start("com.rozsa.services.calc");
 
         System.out.println("Server is running!");
     }

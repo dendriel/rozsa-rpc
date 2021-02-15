@@ -146,7 +146,7 @@ public class HttpRequestHandler  implements HttpHandler {
 
 
     private void sendSuccessNotContent(HttpExchange t) throws IOException {
-        t.sendResponseHeaders(HttpURLConnection.HTTP_NO_CONTENT, 0);;
+        t.sendResponseHeaders(HttpURLConnection.HTTP_NO_CONTENT, -1);
         t.close();
     }
 }
