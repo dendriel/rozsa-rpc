@@ -3,8 +3,8 @@ package com.rozsa.rpc;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,16 +34,13 @@ class ProcedureParametersParser {
     }
 
     private boolean isArray(Type type) {
-        if (type instanceof ParameterizedTypeImpl) {
-            Class<?> rawType = ((ParameterizedTypeImpl) type).getRawType();
-            /* Could have used something more generic, but it would made it more complex.
-              * For instance: rawType.getSuperclass().[...] .getSuperclass().isAssignableFrom(Collection.class)
-              */
+        if (type instanceof ParameterizedType) {
+            Type rawType = ((ParameterizedType) type).getRawType();
             return rawType == List.class || rawType == Collection.class || rawType == Queue.class ||
                     rawType == Deque.class || rawType == Set.class;
         }
 
-        return ((Class) type).isArray();
+        return type.getClass().isArray();
     }
 
     private boolean isNotArray(Type type) {

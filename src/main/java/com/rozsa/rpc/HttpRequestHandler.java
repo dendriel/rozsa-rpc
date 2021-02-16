@@ -13,13 +13,13 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class HttpRequestHandler  implements HttpHandler {
+class HttpRequestHandler implements HttpHandler, RequestHandler {
     private final Gson gson;
-    private final RpcServicesLoader servicesLoader;
     private final ProcedureParametersParser parametersParser;
+    private final RpcServicesProvider servicesProvider;
 
-    protected HttpRequestHandler(RpcServicesLoader servicesLoader) {
-        this.servicesLoader = servicesLoader;
+    public HttpRequestHandler(RpcServicesProvider servicesProvider) {
+        this.servicesProvider = servicesProvider;
 
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").create();
         parametersParser = new ProcedureParametersParser(gson);
@@ -53,7 +53,7 @@ public class HttpRequestHandler  implements HttpHandler {
         // TODO: test contentType
 
         String serviceName = pathParts[pathPartsIdx++];
-        RpcServiceHandler service = servicesLoader.getService(serviceName);
+        RpcServiceHandler service = servicesProvider.getServiceByName(serviceName);
         if (service == null) {
             sendError(t, HttpURLConnection.HTTP_NOT_FOUND, RpcErrors.SERVICE_NOT_FOUND);
             return;

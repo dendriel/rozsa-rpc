@@ -1,24 +1,14 @@
 package com.rozsa.rpc;
 
-import com.sun.net.httpserver.HttpServer;
-
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.InetSocketAddress;
+
+import static com.rozsa.rpc.DependencyProvider.*;
 
 // TODO: allow to startup with debug mode.
 public class RpcServer {
-
-    /**
-     * Use system default to maximum TCP connections waiting at TCP socket.
-     */
-    private final static int defaultMaximumConnections = -1;
-
     private final String ip;
     private final int port;
-
-    // TODO: abstract the transport layer.
-    private HttpServer server;
 
     public RpcServer(int port) {
         this("localhost", port);
@@ -29,24 +19,12 @@ public class RpcServer {
         this.port = port;
     }
 
-    public void start(String... fromPackages) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        wrapUp(ip, port, fromPackages);
-        server.start();
-    }
+    public void start(String... fromPackages) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
+        NetworkServer networkServer = provide(NetworkServer.class, ip, port);
 
-    private void wrapUp(String ip, int port, String[] fromPackages) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        try {
-            InetSocketAddress address = new InetSocketAddress(ip, port);
-            server = HttpServer.create(address, defaultMaximumConnections);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
+        RpcServicesProvider servicesProvider = provide(RpcServicesLoader.class, (Object) fromPackages);
+        RequestHandler handler = provide(RequestHandler.class, new Class<?>[]{RpcServicesProvider.class}, servicesProvider);
 
-        RpcServicesLoader servicesLoader = new RpcServicesLoader(fromPackages);
-        HttpRequestHandler handler = new HttpRequestHandler(servicesLoader);
-
-        server.createContext("/", handler);
-        server.setExecutor(null); // creates a default executor
+        networkServer.start(handler);
     }
 }
