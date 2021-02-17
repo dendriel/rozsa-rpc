@@ -10,7 +10,8 @@ Simple java HTTP-based RPC library.
 - Simple initialization (setup just by setting target service's packages);
 - Pre-cache necessary reflection data at wrap-up;
 - Allow data structures (Array, List, Map, etc);
-- Allow procedure overloading.
+- Allow procedure overloading;
+- Allow transport, parsing and service loading logic to be overwritten by using a dependency provider.
 
 ## Usage
 
@@ -93,7 +94,7 @@ Invoke "calc" service as:
 - Request: ``GET http://localhost/calc/printPi``
 - Response: ``HTTP 204 - no response content``
 
-## GET/POST Requests
+## GET Requests
 
 Use <b>GET</b> for lightweight requests. Procedures called by GET have their arguments (if any) encoded in the URI (as
 path variables). For instance, the following procedure:
@@ -105,6 +106,8 @@ public List<Post> read(String input, int count);
 
 May be invoked by using ``http://localhost/serviceName/read/dummyText/123/``. The downside is that it only supports
 Primitive types as arguments.
+
+## POST Requests
 
 Use <b>POST</b> when it's necessary to transfer larger data payloads. When using POST, the URI arguments won't be used
 and the procedure arguments will be retrieved from the request body. For instance:
@@ -137,7 +140,7 @@ May be invoked by using ``http://localhost/serviceName/createAll`` with the foll
 It is also possible to use POST (instead of GET) to invoke procedures that requires only primitive arguments. The
 arguments will be retrieved from the request body.
 
-## Procedure Overload
+## Procedure Overloading
 
 Procedures accept primitive (boxed and unboxed) and data-structure types. Overloads are allowed  with the following
 conditions:
@@ -146,7 +149,7 @@ conditions:
 - Procedures with the same count of parameters, but with differentiable data types.
 
 Parameters parsing differentiate between <b>Primitives, Objects and Arrays</b> types. *Those may not correspond exactly
-to OO primitives and arrays, but they are a "Json-based view".
+to OO primitives and arrays, but they are a "JSON-based view".
 
 - <b>Primitives</b>: Date, Double, Float, Long, Integer, Short, Character, Byte, Boolean, String and all their unboxed
   counterparts;
@@ -194,5 +197,4 @@ For instance: ``2021-02-15T11:40:15.1234-03:00``
 - Add client API builder
   - Add Sync and Async method calls
   - Add reactive apis
-- Decouple transport code to allow using other implementations;
-- Create error codes sections for doc.
+- Add examples on how to overwrite the logic.
