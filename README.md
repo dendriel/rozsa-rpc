@@ -3,14 +3,15 @@ Simple java HTTP-based RPC library.
 
 ## Features
 
-- Invoked by simple HTTP GET/POST requests;
+- Invoked by HTTP GET/POST requests;
 - Simple annotations usage:
   - @RpcService mark classes to be used in RPC;
   - @RpcProcedure mark methods to be called as procedures;
-- Simple initialization (setup just by setting target service's packages);
-- Pre-cache necessary reflection data at wrap-up;
-- Allow data structures (Array, List, Map, etc);
+- Simple setup (just set target service's packages);
+- Avoid runtime overhead by pre-caching all necessary reflection data at startup;
+- Allow data structures usage (Array, List, Map, etc);
 - Allow procedure overloading;
+- Allow to use custom procedure names (instead of the method name)
 - Allow transport, parsing and service loading logic to be overwritten by using a dependency provider.
 
 ## Usage
@@ -37,6 +38,7 @@ public class Calculator {
         return a - b;
     }
 
+    // Use collection types as parameters.
     @RpcProcedure
     public List<Integer> sum(List<Integer> a, Integer b) {
       List<Integer> result = new ArrayList<>();
@@ -60,7 +62,7 @@ public class Calculator {
 }
 ```
 
-You may setup the server as follows:
+The server may be configured as follows:
 
 ```Java
 package com.rozsa;
@@ -117,11 +119,10 @@ and the procedure arguments will be retrieved from the request body. For instanc
 public void createAll(List<Post> post, Date createdAt);
 ```
 
-May be invoked by using ``http://localhost/serviceName/createAll`` with the following request content:
+May be invoked by using ``http://localhost/serviceName/createAll`` with the following request body:
 ```JSON
 [
     [
-        
         {
             "text": "My first blog post",
             "author": "Vitor Rozsa",
@@ -137,7 +138,7 @@ May be invoked by using ``http://localhost/serviceName/createAll`` with the foll
 ]
 ```
 
-It is also possible to use POST (instead of GET) to invoke procedures that requires only primitive arguments. The
+It is also possible to use POST (instead of GET) to invoke procedures that require only primitive arguments. The
 arguments will be retrieved from the request body.
 
 ## Procedure Overloading
@@ -149,12 +150,12 @@ conditions:
 - Procedures with the same count of parameters, but with differentiable data types.
 
 Parameters parsing differentiate between <b>Primitives, Objects and Arrays</b> types. *Those may not correspond exactly
-to OO primitives and arrays, but they are a "JSON-based view".
+to OO primitives and arrays, but they are a *JSON-based view*.
 
 - <b>Primitives</b>: Date, Double, Float, Long, Integer, Short, Character, Byte, Boolean, String and all their unboxed
   counterparts;
 - <b>Arrays</b>: Array, List, Collection, Queue, Deque and Set;
-- <b>Objects</b>: Maps and any other type that is not in the Primitives nor Arrays list.
+- <b>Objects</b>: Maps and any other types that aren't in the Primitives nor Arrays types list.
 
 When two or more procedures have the same signature and parameters count, the one who matches the received arguments
 list will be selected. For instance:
@@ -164,7 +165,7 @@ list will be selected. For instance:
 // Matching args would be: [ PRIMITIVE ]
 public Book getBooks(int count);
 
-/ Matching args would be: [ ARRAY ]
+// Matching args would be: [ ARRAY ]
 public Book getBooks(List<Integer> ids);
 
 // Matching args would be: [ PRIMITIVE, ARRAY ]
@@ -177,10 +178,10 @@ public Book addBooks(List<String> names, String author);
 public Book addBooks(Map<String, String> relation, int publishingDate);
 ```
 
-The selector will translate the received args only to the types listed above. So, two procedures, say
+The selector will translate the received arguments only to the types listed above. So, two procedures, say
 `readBook(List<Integer> ids)` and `readBook(Collection<Integer> ids)` won't be distinguishable.
 
-Also, null arguments are a permitted and will be matched with any of the available types (only if is still possible to
+Also, null arguments are permitted and will be matched with any of the available types (only if is still possible to
 find the target procedure).
 
 
@@ -196,5 +197,5 @@ For instance: ``2021-02-15T11:40:15.1234-03:00``
 
 - Add client API builder
   - Add Sync and Async method calls
-  - Add reactive apis
+  - Add reactive APIs
 - Add examples on how to overwrite the logic.

@@ -13,7 +13,6 @@ class HttpNetworkServer implements NetworkServer {
 
     private final String ip;
     private final Integer port;
-
     private HttpServer server;
 
     public HttpNetworkServer(String ip, Integer port) {

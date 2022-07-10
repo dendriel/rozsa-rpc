@@ -1,12 +1,14 @@
 package com.rozsa.test;
 
+import com.rozsa.rpc.RpcServer;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 public class Main {
 
-    public static void main(String[] args) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException {
-        com.rozsa.rpc.RpcServer rpc = new com.rozsa.rpc.RpcServer(8000);
+    public static void main(String[] args) throws IOException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        RpcServer rpc = new RpcServer(8000);
 
 //        rpc.start("com.rozsa.services");
         // or

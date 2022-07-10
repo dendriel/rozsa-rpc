@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Wrap up the service's instances which will be invoked by remote calls.
+ */
 class RpcServiceHandler {
     private final String serviceName;
     private final Object instance;

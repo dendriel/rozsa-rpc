@@ -13,22 +13,25 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+/**
+ * Parse and dispatches HTTP requests to its services/procedures.
+ */
 class HttpRequestHandler implements HttpHandler, RequestHandler {
     private final Gson gson;
-    private final ProcedureParametersParser parametersParser;
+    private final JsonProcedureParametersParser parametersParser;
     private final RpcServicesProvider servicesProvider;
 
     public HttpRequestHandler(RpcServicesProvider servicesProvider) {
         this.servicesProvider = servicesProvider;
 
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").create();
-        parametersParser = new ProcedureParametersParser(gson);
+        parametersParser = new JsonProcedureParametersParser(gson);
     }
 
     @Override
     public void handle(HttpExchange t) throws IOException {
         try {
-            doHhandle(t);
+            doHandle(t);
         }
         catch (Exception e) {
             sendError(t, HttpURLConnection.HTTP_INTERNAL_ERROR, e.toString());
@@ -36,7 +39,7 @@ class HttpRequestHandler implements HttpHandler, RequestHandler {
         }
     }
 
-    public void doHhandle(HttpExchange t) throws IOException {
+    public void doHandle(HttpExchange t) throws IOException {
         InputStreamReader isr = new InputStreamReader(t.getRequestBody(), StandardCharsets.UTF_8);
         BufferedReader br = new BufferedReader(isr);
 
@@ -78,7 +81,7 @@ class HttpRequestHandler implements HttpHandler, RequestHandler {
         try {
             RpcServiceHandler.RpcProcedureHandler targetProcedure = parametersParser.findProcedureByArgs(jsonArray, procedures);
 
-            List<Object> params = parametersParser.getParams(jsonArray, targetProcedure.getParameterTypes());
+            List<Object> params = parametersParser.parseParams(jsonArray, targetProcedure.getParameterTypes());
             response = targetProcedure.run(params);
             hasResponse = targetProcedure.hasResponse();
         }

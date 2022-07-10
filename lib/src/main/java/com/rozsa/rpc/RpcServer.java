@@ -5,7 +5,11 @@ import java.lang.reflect.InvocationTargetException;
 
 import static com.rozsa.rpc.DependencyProvider.*;
 
-// TODO: allow to startup with debug mode.
+/**
+ * RpcServer is the entry point for the RPC solution. Its wrap-up the network ({@link com.rozsa.rpc.NetworkServer}),
+ * services and procedures scanning ({@link com.rozsa.rpc.RpcServicesLoader}) and the calls dispatcher
+ * ({@link com.rozsa.rpc.RequestHandler}).
+ */
 public class RpcServer {
     private final String ip;
     private final int port;
@@ -22,6 +26,7 @@ public class RpcServer {
     public void start(String... fromPackages) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         NetworkServer networkServer = provide(NetworkServer.class, ip, port);
 
+        // TODO: may be clearer to provide the service loader and provider separately.
         RpcServicesProvider servicesProvider = provide(RpcServicesLoader.class, (Object) fromPackages);
         RequestHandler handler = provide(RequestHandler.class, new Class<?>[]{RpcServicesProvider.class}, servicesProvider);
 

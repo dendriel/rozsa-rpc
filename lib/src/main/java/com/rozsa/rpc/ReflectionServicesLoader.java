@@ -12,11 +12,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Set;
 
-class ServicesLoader implements RpcServicesLoader, RpcServicesProvider {
+class ReflectionServicesLoader implements RpcServicesLoader, RpcServicesProvider {
     private final HashMap<String, RpcServiceHandler> services;
     private final String[] packages;
 
-    public ServicesLoader(String... packages) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public ReflectionServicesLoader(String... packages) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         this.packages = packages;
         this.services = new HashMap<>();
 

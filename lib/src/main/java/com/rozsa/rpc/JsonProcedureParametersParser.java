@@ -9,13 +9,13 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.rozsa.rpc.ProcedureParametersParser.JsonParameterType.*;
+import static com.rozsa.rpc.JsonProcedureParametersParser.JsonParameterType.*;
 
-class ProcedureParametersParser {
+class JsonProcedureParametersParser {
 
     private final Gson gson;
 
-    ProcedureParametersParser(Gson gson) {
+    JsonProcedureParametersParser(Gson gson) {
         this.gson = gson;
     }
 
@@ -120,7 +120,7 @@ class ProcedureParametersParser {
         return remaining.get(0);
     }
 
-    public List<Object> getParams(JsonArray jsonArray, Type[] paramTypes) throws IllegalArgumentException {
+    public List<Object> parseParams(JsonArray jsonArray, Type[] paramTypes) throws IllegalArgumentException {
         List<Object> params = new ArrayList<>();
 
         if (paramTypes.length == 0) {
