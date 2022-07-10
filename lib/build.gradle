@@ -1,6 +1,20 @@
 description 'Rozsa RPC library'
 
+apply plugin: 'java-library'
+
+
+ext {
+    cucumberVersion = '7.4.1'
+}
+
 dependencies {
     implementation 'com.google.code.gson:gson:2.9.0'
     implementation 'org.reflections:reflections:0.10.2'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.1'
+    testImplementation "io.cucumber:cucumber-java:${cucumberVersion}"
+    testImplementation "io.cucumber:cucumber-junit:${cucumberVersion}"
+    testImplementation "io.cucumber:cucumber-spring:${cucumberVersion}"
+    testImplementation 'org.springframework:spring-web:5.3.21'
+
 }
