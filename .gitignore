@@ -59,7 +59,7 @@ hs_err_pid*
 # .idea/modules.xml
 # .idea/*.iml
 # .idea/modules
-# *.iml
+ *.iml
 # *.ipr
 
 # CMake
@@ -74,3 +74,6 @@ cmake-build-*/
 # IntelliJ
 out/
 target/
+build/
+
+.gradle/*

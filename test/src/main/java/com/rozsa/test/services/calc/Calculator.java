@@ -1,4 +1,4 @@
-package com.rozsa.services.calc;
+package com.rozsa.test.services.calc;
 
 import com.rozsa.rpc.annotations.RpcProcedure;
 import com.rozsa.rpc.annotations.RpcService;

@@ -1,0 +1,6 @@
+rootProject.name = 'rozsa-rpc'
+
+include 'lib'
+include 'test'
+
+project(':lib').name = 'rozsa-rpc'

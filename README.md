@@ -114,7 +114,7 @@ and the procedure arguments will be retrieved from the request body. For instanc
 ```Java
 // invoked by using POST /serviceName/procedureName
 @RpcProcedure
-public void createAll(List<Post> post, Date createdAt); // test with a date.
+public void createAll(List<Post> post, Date createdAt);
 ```
 
 May be invoked by using ``http://localhost/serviceName/createAll`` with the following request content:

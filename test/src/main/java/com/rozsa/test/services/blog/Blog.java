@@ -1,4 +1,4 @@
-package com.rozsa.services.blog;
+package com.rozsa.test.services.blog;
 
 import com.rozsa.rpc.annotations.RpcProcedure;
 import com.rozsa.rpc.annotations.RpcService;

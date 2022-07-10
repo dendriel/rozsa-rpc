@@ -1,0 +1,5 @@
+description 'Testing module for rozsa-rpc'
+
+dependencies {
+    implementation project(':rozsa-rpc')
+}
