@@ -193,6 +193,13 @@ find the target procedure).
 
 For instance: ``2021-02-15T11:40:15.1234-03:00``
 
+## Class Diagram
+- Green are core classes;
+- Yellow are core interfaces (mostly overwrite-able);
+- White are auxiliary classes.
+
+![Class Diagram](doc/rozsa-rpc-class-diagram.png)
+
 ## TODO
 
 - Add client API builder

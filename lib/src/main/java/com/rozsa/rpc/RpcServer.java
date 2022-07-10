@@ -23,6 +23,15 @@ public class RpcServer {
         this.port = port;
     }
 
+    /**
+     * Starts the RPC server serving the services from specified packages.
+     * @param fromPackages Target packages to be scanned for services and procedures.
+     * @throws InvocationTargetException
+     * @throws NoSuchMethodException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws IOException
+     */
     public void start(String... fromPackages) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         NetworkServer networkServer = provide(NetworkServer.class, ip, port);
 
