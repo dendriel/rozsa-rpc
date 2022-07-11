@@ -8,6 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import static org.junit.Assert.*;
 
 public class StepDefinition extends IntegrationTest {
@@ -57,11 +62,25 @@ public class StepDefinition extends IntegrationTest {
         assertEquals(boolValue, response.getBody());
     }
 
-    @And("response has character value {string}")
-    public void validateCharacterResponse(String value) {
+    @And("response has text value {string}")
+    public void validateTextResponse(String value) {
         log.info("response status value: {} expected: {}", response.getBody(), value);
 
         assertNotNull(response);
         assertEquals(value, response.getBody());
+    }
+
+    @And("response has date value {string}")
+    public void validateDateResponse(String value) throws ParseException {
+        log.info("response status value: {} expected: {}", response.getBody(), value);
+
+        assertNotNull(response);
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+
+        Date expected = dateFormat.parse(value);
+        Date received = dateFormat.parse((String) response.getBody());
+
+        assertEquals(expected, received);
     }
 }

@@ -6,9 +6,19 @@ Feature: Test operations invoked by GET method
     Then response status code is 204
 
   Scenario: Get call with integer types
-    When GET request is made for "/calc/sum/123/456"
+    When GET request is made for "/calc/sum/1230/4560"
     Then response status code is 200
-    And response has numeric value 579
+    And response has numeric value 5790
+
+  Scenario: Get call with short types
+    When GET request is made for "/calc/cut/100/200"
+    Then response status code is 200
+    And response has numeric value 150
+
+  Scenario: Get call with long types
+    When GET request is made for "/calc/enlarge/100/200"
+    Then response status code is 200
+    And response has numeric value 600
 
   Scenario: Get call with float types
     When GET request is made for "/calc/sub/12.5/20.7"
@@ -33,9 +43,19 @@ Feature: Test operations invoked by GET method
   Scenario: Get call with character types
     When GET request is made for "/calc/bigger/k/j"
     Then response status code is 200
-    And response has character value "k"
+    And response has text value "k"
 
   Scenario: Get call with byte types
     When GET request is made for "/calc/next/100"
     Then response status code is 200
     And response has numeric value 101
+
+  Scenario: Get call with String type
+    When GET request is made for "/calc/reverse/abcdefg"
+    Then response status code is 200
+    And response has text value "gfedcba"
+
+  Scenario: Get call with Date type
+    When GET request is made for "/calc/nextDay/2021-02-15T11:40:15.123-0300"
+    Then response status code is 200
+    And response has date value "2021-02-16T11:40:15.123-0300"

@@ -191,7 +191,7 @@ find the target procedure).
 "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
 ```
 
-For instance: ``2021-02-15T11:40:15.1234-03:00``
+For instance: ``2021-02-15T11:40:15.123-0300``
 
 ## Class Diagram
 - Green are core classes;
