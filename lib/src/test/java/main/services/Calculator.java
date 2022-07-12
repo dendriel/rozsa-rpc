@@ -64,7 +64,7 @@ public class Calculator {
         return new StringBuilder(value).reverse().toString();
     }
 
-    @RpcProcedure
+    @RpcProcedure("next-day")
     public Date nextDay(Date value) {
         return new Date(value.getTime() + (1000 * 60 * 60 * 24));
     }

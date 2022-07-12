@@ -20,7 +20,7 @@ public class StepDefinition extends IntegrationTest {
 
     private final TestRestTemplate restTemplate;
 
-    ResponseEntity<?> response;
+    public static ResponseEntity<?> response;
 
     public StepDefinition(TestRestTemplate restTemplate) {
         this.restTemplate = restTemplate;

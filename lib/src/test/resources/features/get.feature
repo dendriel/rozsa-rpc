@@ -56,6 +56,6 @@ Feature: Test operations invoked by GET method
     And response has text value "gfedcba"
 
   Scenario: Get call with Date type
-    When GET request is made for "/calc/nextDay/2021-02-15T11:40:15.123-0300"
+    When GET request is made for "/calc/next-day/2021-02-15T11:40:15.123-0300"
     Then response status code is 200
     And response has date value "2021-02-16T11:40:15.123-0300"
